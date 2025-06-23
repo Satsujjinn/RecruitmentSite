@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 const useMock = !process.env.NEXT_PUBLIC_API_URL;
 
 let socket: Socket | null = null;
+let currentQuery = '';
 
 export function getSocket(userId?: string, roomId?: string) {
   if (useMock) {
@@ -10,12 +11,25 @@ export function getSocket(userId?: string, roomId?: string) {
     return {
       on: () => {},
       emit: () => {},
+      off: () => {},
+      disconnect: () => {},
     } as unknown as Socket;
   }
-  if (!socket) {
+  const query = `${userId || ''}-${roomId || ''}`;
+  if (!socket || currentQuery !== query) {
+    if (socket) socket.disconnect();
     socket = io(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000', {
       query: { userId, roomId },
     });
+    currentQuery = query;
   }
   return socket;
+}
+
+export function closeSocket() {
+  if (!useMock && socket) {
+    socket.disconnect();
+    socket = null;
+    currentQuery = '';
+  }
 }

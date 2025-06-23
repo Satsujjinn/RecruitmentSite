@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getSocket } from '@/lib/socket';
+import { getSocket, closeSocket } from '@/lib/socket';
 import DashboardHeader from '@/components/DashboardHeader';
 import Skeleton from 'react-loading-skeleton';
 import api from '@/lib/api';
@@ -36,7 +36,7 @@ export default function AthleteDashboard() {
     }
     fetchMatches();
     const socket = getSocket(athleteId);
-    socket.on('match', (match: Match) => {
+    const onMatch = (match: Match) => {
       if (match.athleteId === athleteId) {
         setMatches((m) => {
           const existing = m.find((x) => x._id === match._id);
@@ -46,7 +46,12 @@ export default function AthleteDashboard() {
           return [...m, match];
         });
       }
-    });
+    };
+    socket.on('match', onMatch);
+    return () => {
+      socket.off('match', onMatch);
+      closeSocket();
+    };
   }, [athleteId, user]);
 
   useEffect(() => {

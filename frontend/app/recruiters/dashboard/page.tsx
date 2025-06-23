@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getSocket } from '@/lib/socket';
+import { getSocket, closeSocket } from '@/lib/socket';
 import Link from 'next/link';
 import AthleteGrid from '@/components/AthleteGrid';
 import DashboardHeader from '@/components/DashboardHeader';
@@ -49,7 +49,7 @@ export default function RecruiterDashboard() {
     }
     fetchAthletes();
     const socket = getSocket(recruiterId);
-    socket.on('match', (m: Match) => {
+    const onMatch = (m: Match) => {
       if (m.recruiterId === recruiterId) {
         setMatches((prev) => {
           const existing = prev.find((x) => x._id === m._id);
@@ -59,7 +59,12 @@ export default function RecruiterDashboard() {
           return [...prev, m];
         });
       }
-    });
+    };
+    socket.on('match', onMatch);
+    return () => {
+      socket.off('match', onMatch);
+      closeSocket();
+    };
   }, [recruiterId, user, router]);
 
   useEffect(() => {
