@@ -34,6 +34,8 @@ npm --workspace server run dev
 Start MongoDB and run these commands in separate terminals. The Next.js app
 listens on <http://localhost:3000> while the API server runs on port 3001.
 
+The server also exposes a Socket.IO endpoint at `ws://localhost:3001/socket.io` which powers the real-time chat features. Clients should connect with this URL when `NEXT_PUBLIC_API_URL` is set in the frontend environment.
+
 
 
 To try the dashboards without a backend, you can run the frontends in mock mode by commenting out `NEXT_PUBLIC_API_URL` in the environment file:
