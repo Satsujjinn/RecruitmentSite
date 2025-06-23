@@ -3,7 +3,8 @@
   "workspaces": [
     "client",
     "web",
-    "frontend"
+    "frontend",
+    "server"
   ],
   "scripts": {
     "dev": "npm --workspace web run dev",

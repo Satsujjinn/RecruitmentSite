@@ -1,9 +1,10 @@
 # TalentScout
 
-This repository mirrors the basic structure of **TalentSite**. The monorepo contains two packages:
+This repository mirrors the basic structure of **TalentSite**. The monorepo contains multiple packages:
 
 - **client/** – static HTML forms for manual testing
 - **web/** – Next.js application
+- **server/** – Express backend with MongoDB and AWS S3
 
 ## Getting Started
 
@@ -26,6 +27,7 @@ an error if this variable is missing.
 
 ```bash
 npm run dev
+npm --workspace server run dev
 ```
 
 
