@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Run lint
-        run: npm run lint
+        run: npm --workspace frontend run lint
       - name: Run unit tests
         run: npm test
       - name: Install Playwright browsers
