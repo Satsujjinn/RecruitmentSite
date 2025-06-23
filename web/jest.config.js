@@ -6,8 +6,5 @@ module.exports = createJestConfig({
   coverageThreshold: { global: { branches: 50, functions: 50, lines: 50, statements: 50 } },
   moduleNameMapper: {
     '^../../shared/(.*)$': '<rootDir>/../shared/$1'
-  },
-  transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.json' }]
   }
 });
