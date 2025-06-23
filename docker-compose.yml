@@ -1,8 +1,36 @@
 version: '3'
 services:
+  mongodb:
+    image: mongo
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - '27017:27017'
+
+  server:
+    build: ./server
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/talentscout
+      JWT_SECRET: ${JWT_SECRET:-changeme}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME:-}
+      FRONTEND_URL: http://localhost:3000
+    depends_on:
+      - mongodb
+    ports:
+      - '3001:3001'
+
   web:
     build: ./web
     environment:
-      - NEXT_PUBLIC_API_URL=
+      NEXT_PUBLIC_API_URL: http://server:3001
+      JWT_SECRET: ${JWT_SECRET:-changeme}
+    depends_on:
+      - server
     ports:
       - '3000:3000'
+
+volumes:
+  mongodb_data:

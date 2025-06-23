@@ -65,8 +65,19 @@ npm test
 This executes the baseline script which runs unit tests for each package and writes `BASELINE_REPORT.md`.
 
 ### Docker Compose
+The compose file now starts MongoDB, the API server and the Next.js frontend.
+Copy the example environment files and then launch all services:
 
-A simple `docker-compose.yml` is provided to run the Next.js app in a container.
+```bash
+cp web/.env.example web/.env
+cp server/.env.example server/.env
+docker compose up --build
+```
+
+Environment variables for MongoDB, JWT signing and optional AWS credentials are
+passed to the `server` container. The `web` service receives
+`NEXT_PUBLIC_API_URL` pointing at the API so requests from the browser resolve
+to the correct container.
 
 ## Deployment
 
