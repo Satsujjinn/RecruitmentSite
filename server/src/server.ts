@@ -1,6 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { createServer } from 'http';
+import { Server as SocketIOServer } from 'socket.io';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import multer from 'multer';
 import { createReadStream } from 'fs';
@@ -15,6 +17,9 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+
+const server = createServer(app);
+const io = new SocketIOServer(server, { path: '/socket.io', cors: { origin: '*' } });
 
 const PORT = process.env.PORT || 3001;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/talentscout';
@@ -46,6 +51,22 @@ const s3 = new S3Client({
 });
 
 const upload = multer({ dest: 'uploads/' });
+
+io.on('connection', (socket) => {
+  const { roomId } = socket.handshake.query as { roomId?: string };
+  if (roomId) {
+    socket.join(roomId.toString());
+  }
+  socket.on('join', (id: string) => {
+    socket.join(id);
+  });
+  socket.on('message', async (data: { roomId: string; text: string; senderId: string }) => {
+    if (!data.roomId || !data.text || !data.senderId) return;
+    const message = new Message({ match: data.roomId, text: data.text, sender: data.senderId });
+    await message.save();
+    io.to(data.roomId).emit('message', data);
+  });
+});
 
 function authMiddleware(req: express.Request, res: express.Response, next: express.NextFunction) {
   const header = req.headers.authorization;
@@ -233,6 +254,7 @@ app.post('/api/messages', authMiddleware, requireFields(['match', 'text']), asyn
     text: req.body.text,
   });
   await message.save();
+  io.to(req.body.match).emit('message', { roomId: req.body.match, text: req.body.text, senderId: (req as any).user.userId });
   res.status(201).json(message);
 });
 
@@ -240,6 +262,6 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
