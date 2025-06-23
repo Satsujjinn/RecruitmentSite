@@ -1,7 +1,7 @@
 // frontend/app/page.tsx
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -110,6 +110,23 @@ const FEATURES = [
 ];
 
 // ----------------------------------------------------------------------------
+// ADVANCED FEATURES (hidden until "Learn More" is clicked)
+const ADVANCED_FEATURES = [
+  {
+    title: 'Team Collaboration',
+    description: 'Coordinate tryouts and share notes with your recruiting team.',
+  },
+  {
+    title: 'Export Data',
+    description: 'Download CSV reports of athlete stats and chat history.',
+  },
+  {
+    title: 'Custom Alerts',
+    description: 'Get notified instantly when new athletes meet your criteria.',
+  },
+];
+
+// ----------------------------------------------------------------------------
 // PROCESS STEPS
 const STEPS = [
   {
@@ -191,6 +208,7 @@ const SAMPLE_ATHLETES = [
 ];
 
 export default function HomePage() {
+  const [showAdvanced, setShowAdvanced] = useState(false);
   return (
     <div className="flex flex-col font-sans">
       {/* HERO SECTION */}
@@ -273,6 +291,31 @@ export default function HomePage() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ADVANCED FEATURES (Progressive Disclosure) */}
+      <section className="py-20 bg-green-50">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold text-green-700 mb-6">Advanced Features</h2>
+          {!showAdvanced && (
+            <button
+              onClick={() => setShowAdvanced(true)}
+              className="px-6 py-3 bg-orange-500 text-white rounded hover:bg-orange-400"
+            >
+              Learn More
+            </button>
+          )}
+          {showAdvanced && (
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {ADVANCED_FEATURES.map((feature) => (
+                <div key={feature.title} className="bg-white rounded-lg shadow-lg p-6">
+                  <h3 className="text-xl font-semibold mb-2 text-green-800">{feature.title}</h3>
+                  <p className="text-green-600">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

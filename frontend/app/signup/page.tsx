@@ -93,6 +93,10 @@ export default function SignupPage() {
                 />
               </div>
             )}
+            <p className="text-xs text-green-700 mb-4">
+              By signing up you agree to our{' '}
+              <Link href="/privacy" className="underline">privacy policy</Link>.
+            </p>
             <button
               type="submit"
               className="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-400 transition"

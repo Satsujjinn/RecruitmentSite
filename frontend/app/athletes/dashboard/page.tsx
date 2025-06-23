@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getSocket, closeSocket } from '@/lib/socket';
@@ -45,6 +46,31 @@ export default function AthleteDashboard() {
           }
           return [...m, match];
         });
+        if (match.status === 'pending') {
+          toast.custom((t) => (
+            <div className="bg-white p-4 rounded shadow flex items-center space-x-2">
+              <span>Recruiter {match.recruiterId} sent a match request.</span>
+              <button
+                onClick={() => {
+                  api.patch(`/api/matches/${match._id}`, { status: 'accepted' });
+                  toast.dismiss(t.id);
+                }}
+                className="px-2 py-1 bg-green-600 text-white rounded"
+              >
+                Accept
+              </button>
+              <button
+                onClick={() => {
+                  api.patch(`/api/matches/${match._id}`, { status: 'declined' });
+                  toast.dismiss(t.id);
+                }}
+                className="px-2 py-1 bg-red-600 text-white rounded"
+              >
+                Decline
+              </button>
+            </div>
+          ));
+        }
       }
     };
     socket.on('match', onMatch);
