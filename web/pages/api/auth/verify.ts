@@ -1,9 +1,37 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    res.status(200).json({ message: 'Verification stub' });
-  } else {
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  if (req.method !== 'POST') {
     res.status(405).end();
+    return;
+  }
+
+  if (!API_URL) {
+    res.status(500).json({ message: 'API URL not configured' });
+    return;
+  }
+
+  try {
+    const backendRes = await fetch(`${API_URL}/api/auth/verify`, {
+      method: 'POST',
+      headers: {
+        Authorization: req.headers.authorization || '',
+      },
+    });
+
+    const body = await backendRes.text();
+    res.status(backendRes.status);
+    res.setHeader(
+      'Content-Type',
+      backendRes.headers.get('content-type') || 'application/json'
+    );
+    res.send(body);
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
   }
 }
