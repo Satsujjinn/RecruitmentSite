@@ -16,7 +16,7 @@ import Message from './models/Message';
 
 dotenv.config();
 
-const app = express();
+export const app = express();
 app.use(express.json());
 
 const server = createServer(app);
@@ -44,7 +44,7 @@ const userSchema = new mongoose.Schema({
   avatar: String,
 }, { timestamps: true });
 
-const User = mongoose.model('User', userSchema);
+export const User = mongoose.model('User', userSchema);
 
 // AWS S3 setup
 const s3 = new S3Client({
@@ -319,6 +319,10 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+}
+
+export default app;

@@ -20,7 +20,8 @@ jest.mock('@/lib/api', () => ({
 }));
 
 jest.mock('../lib/socket', () => ({
-  getSocket: () => ({ on: jest.fn() })
+  getSocket: () => ({ on: jest.fn(), off: jest.fn() }),
+  closeSocket: jest.fn()
 }));
 
 // Mock shared component to avoid transform issues

@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import { execSync } from 'child_process';
 
-const packages = ['web'];
+const packages = ['web', 'frontend', 'server'];
 let report = '';
 
 for (const pkg of packages) {
@@ -11,8 +11,17 @@ for (const pkg of packages) {
   } catch (err) {
     report += `## Outdated packages for ${pkg}\nnone\n`;
   }
-  const envExample = await fs.readFile(`${pkg}/.env.example`, 'utf8');
-  report += `### ${pkg} .env.example\n\n\`\`\`\n${envExample}\n\`\`\`\n`;
+  let envContents = '';
+  try {
+    envContents = await fs.readFile(`${pkg}/.env.example`, 'utf8');
+  } catch {
+    try {
+      envContents = await fs.readFile(`${pkg}/.env.local.example`, 'utf8');
+    } catch {}
+  }
+  if (envContents) {
+    report += `### ${pkg} environment example\n\n\`\`\`\n${envContents}\n\`\`\`\n`;
+  }
   try {
     const test = execSync('npm test --silent', { cwd: pkg });
     report += `### ${pkg} tests\n\n\`\`\`\n${test}\n\`\`\`\n`;
