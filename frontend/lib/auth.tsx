@@ -122,13 +122,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return;
     }
-    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/payments/subscribe`, {
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/payments/subscribe`, {
       userId: user?.id,
     });
     if (user) {
       const updated = { ...user, isSubscribed: true } as UserProfile;
       setUser(updated);
       localStorage.setItem('auth', JSON.stringify({ token, user: updated }));
+    }
+    if (res.data.url) {
+      window.location.href = res.data.url as string;
     }
   };
 

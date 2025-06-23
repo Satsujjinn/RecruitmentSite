@@ -8,6 +8,7 @@ import multer from 'multer';
 import { createReadStream } from 'fs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import Stripe from 'stripe';
 import Athlete from './models/Athlete';
 import Recruiter from './models/Recruiter';
 import Match from './models/Match';
@@ -24,6 +25,9 @@ const io = new SocketIOServer(server, { path: '/socket.io', cors: { origin: '*' 
 const PORT = process.env.PORT || 3001;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/talentscout';
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+  apiVersion: '2023-10-16',
+});
 
 mongoose.connect(MONGO_URI)
   .then(() => console.log('MongoDB connected'))
@@ -36,6 +40,7 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: false },
   role: { type: String, default: 'user' },
   isVerified: { type: Boolean, default: false },
+  isSubscribed: { type: Boolean, default: false },
   avatar: String,
 }, { timestamps: true });
 
@@ -106,7 +111,22 @@ app.post('/api/auth/register', async (req, res) => {
   await user.save();
   const verifyToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1d' });
   console.log(`Verification token for ${email}: ${verifyToken}`);
-  res.status(201).json({ message: 'User registered', verifyToken });
+  const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+  res.status(201).json({
+    token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role,
+      isVerified: user.isVerified,
+      isSubscribed: user.isSubscribed,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    },
+    verifyToken,
+  });
 });
 
 app.post('/api/auth/login', async (req, res) => {
@@ -120,7 +140,20 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(401).json({ message: 'Invalid credentials' });
   }
   const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-  res.json({ token });
+  res.json({
+    token,
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role,
+      isVerified: user.isVerified,
+      isSubscribed: user.isSubscribed,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    },
+  });
 });
 
 app.post('/api/auth/verify', async (req, res) => {
@@ -256,6 +289,30 @@ app.post('/api/messages', authMiddleware, requireFields(['match', 'text']), asyn
   await message.save();
   io.to(req.body.match).emit('message', { roomId: req.body.match, text: req.body.text, senderId: (req as any).user.userId });
   res.status(201).json(message);
+});
+
+// Payment endpoints
+app.post('/api/payments/subscribe', authMiddleware, async (req, res) => {
+  try {
+    const userId = (req as any).user.userId;
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: process.env.STRIPE_PRICE_ID || '',
+          quantity: 1,
+        },
+      ],
+      success_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/subscribe?success=true`,
+      cancel_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/subscribe?canceled=true`,
+    });
+    await User.findByIdAndUpdate(userId, { isSubscribed: true });
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Failed to create checkout session' });
+  }
 });
 
 app.get('/api/health', (_req, res) => {
