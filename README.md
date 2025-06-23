@@ -36,19 +36,21 @@ listens on <http://localhost:3000> while the API server runs on port 3001.
 
 
 
-To try the dashboards without a backend, use the `frontend` package which ships with mock data:
+To try the dashboards without a backend, you can run the frontends in mock mode by commenting out `NEXT_PUBLIC_API_URL` in the environment file:
 
 ```bash
 cd frontend
 cp .env.local.example .env.local
+# comment NEXT_PUBLIC_API_URL in .env.local to enable mock data
 npm run demo
 ```
 
-The older `web` package now also supports mock API routes. Copy the example env file, leave `NEXT_PUBLIC_API_URL` empty and run the dev server:
+The older `web` package also supports mock API routes. Comment the variable in `.env` before starting the dev server:
 
 ```bash
 cd web
 cp .env.example .env
+# comment NEXT_PUBLIC_API_URL in .env to enable mock data
 npm run dev
 ```
 
