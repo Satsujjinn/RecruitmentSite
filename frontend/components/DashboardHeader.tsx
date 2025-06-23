@@ -10,7 +10,7 @@ export default function DashboardHeader() {
         <Link href="/" className="font-bold text-lg">
           TalentScout
         </Link>
-        <nav className="space-x-4 text-sm">
+        <nav className="space-x-4 text-sm items-center flex">
           {user?.role === 'recruiter' && (
             <Link href="/recruiters/dashboard" className="hover:underline">
               Recruiter
@@ -24,6 +24,11 @@ export default function DashboardHeader() {
           <button onClick={logout} className="hover:underline">
             Logout
           </button>
+          {user && (
+            <span className="ml-4 text-xs italic">
+              {user.isSubscribed ? 'Subscribed' : 'Free tier'}
+            </span>
+          )}
         </nav>
       </div>
     </header>
