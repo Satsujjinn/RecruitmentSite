@@ -12,16 +12,17 @@ This repository mirrors the basic structure of **TalentSite**. The monorepo cont
 
 ```bash
 cp web/.env.example web/.env
+cp server/.env.example server/.env
 npm install --workspaces
 ```
+
+Edit both `.env` files and provide values for `JWT_SECRET`, `MONGO_URI` and
+the optional AWS settings if you plan to upload avatars.
 
 Use **Node.js 18** when installing dependencies. Newer Node versions may fail to
 load the `lightningcss` binary that Next.js depends on.
 If you see an error like `Cannot find module '../lightningcss.darwin-arm64.node'`,
 switch to Node 18 and reinstall packages.
-
-Set a value for `JWT_SECRET` in each `.env` file. The applications will throw
-an error if this variable is missing.
 
 ### Running Locally
 
@@ -29,6 +30,9 @@ an error if this variable is missing.
 npm run dev
 npm --workspace server run dev
 ```
+
+Start MongoDB and run these commands in separate terminals. The Next.js app
+listens on <http://localhost:3000> while the API server runs on port 3001.
 
 
 
@@ -71,6 +75,8 @@ production secrets:
 
 ```bash
 cp web/.env.example web/.env
+# copy server environment as well
+cp server/.env.example server/.env
 # edit this file with real values
 ```
 
