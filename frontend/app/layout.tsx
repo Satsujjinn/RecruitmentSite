@@ -3,6 +3,7 @@ import "./globals.css";
 import 'react-loading-skeleton/dist/skeleton.css';
 import { AuthProvider } from "../lib/auth";
 import ToastProvider from "../components/ToastProvider";
+import SiteHeader from "../components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -20,7 +21,10 @@ export default function RootLayout({
         className="antialiased"
       >
         <ToastProvider />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <SiteHeader />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
