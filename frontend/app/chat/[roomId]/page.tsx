@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { getSocket } from '@/lib/socket';
+import { getSocket, closeSocket } from '@/lib/socket';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import api from '@/lib/api';
@@ -25,9 +25,14 @@ export default function ChatRoom() {
       const res = await api.get(`/api/matches/${roomId}`);
       setStatus(res.data.status);
       const socket = getSocket(userId, roomId);
-      socket.on('message', (msg: Message) => {
+      const onMessage = (msg: Message) => {
         setMessages((prev) => [...prev, msg]);
-      });
+      };
+      socket.on('message', onMessage);
+      return () => {
+        socket.off('message', onMessage);
+        closeSocket();
+      };
     }
     init();
   }, [roomId, userId]);
