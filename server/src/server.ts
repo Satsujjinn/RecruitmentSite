@@ -6,6 +6,10 @@ import multer from 'multer';
 import { createReadStream } from 'fs';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import Athlete from './models/Athlete';
+import Recruiter from './models/Recruiter';
+import Match from './models/Match';
+import Message from './models/Message';
 
 dotenv.config();
 
@@ -54,6 +58,17 @@ function authMiddleware(req: express.Request, res: express.Response, next: expre
   } catch {
     return res.status(401).json({ message: 'Unauthorized' });
   }
+}
+
+function requireFields(fields: string[]) {
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    for (const field of fields) {
+      if (!req.body[field]) {
+        return res.status(400).json({ message: `Missing field ${field}` });
+      }
+    }
+    next();
+  };
 }
 
 app.post('/api/auth/register', async (req, res) => {
@@ -127,6 +142,98 @@ app.post('/api/users', authMiddleware, upload.single('avatar'), async (req, res)
     console.error(err);
     res.status(500).json({ message: 'Error creating user' });
   }
+});
+
+// Athlete CRUD
+app.get('/api/athletes', authMiddleware, async (_req, res) => {
+  const athletes = await Athlete.find().populate('user');
+  res.json(athletes);
+});
+
+app.post('/api/athletes', authMiddleware, requireFields(['sport']), async (req, res) => {
+  const athlete = new Athlete({
+    user: (req as any).user.userId,
+    sport: req.body.sport,
+    position: req.body.position,
+    bio: req.body.bio,
+  });
+  await athlete.save();
+  res.status(201).json(athlete);
+});
+
+app.put('/api/athletes/:id', authMiddleware, async (req, res) => {
+  const athlete = await Athlete.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  if (!athlete) return res.status(404).json({ message: 'Not found' });
+  res.json(athlete);
+});
+
+app.delete('/api/athletes/:id', authMiddleware, async (req, res) => {
+  await Athlete.findByIdAndDelete(req.params.id);
+  res.status(204).end();
+});
+
+// Recruiter CRUD
+app.get('/api/recruiters', authMiddleware, async (_req, res) => {
+  const recruiters = await Recruiter.find().populate('user');
+  res.json(recruiters);
+});
+
+app.post('/api/recruiters', authMiddleware, requireFields(['company']), async (req, res) => {
+  const recruiter = new Recruiter({
+    user: (req as any).user.userId,
+    company: req.body.company,
+    bio: req.body.bio,
+  });
+  await recruiter.save();
+  res.status(201).json(recruiter);
+});
+
+app.put('/api/recruiters/:id', authMiddleware, async (req, res) => {
+  const recruiter = await Recruiter.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  if (!recruiter) return res.status(404).json({ message: 'Not found' });
+  res.json(recruiter);
+});
+
+app.delete('/api/recruiters/:id', authMiddleware, async (req, res) => {
+  await Recruiter.findByIdAndDelete(req.params.id);
+  res.status(204).end();
+});
+
+// Match endpoints
+app.get('/api/matches', authMiddleware, async (_req, res) => {
+  const matches = await Match.find().populate('athlete recruiter');
+  res.json(matches);
+});
+
+app.post('/api/matches', authMiddleware, requireFields(['athlete', 'recruiter']), async (req, res) => {
+  const match = new Match({
+    athlete: req.body.athlete,
+    recruiter: req.body.recruiter,
+  });
+  await match.save();
+  res.status(201).json(match);
+});
+
+app.put('/api/matches/:id', authMiddleware, async (req, res) => {
+  const match = await Match.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  if (!match) return res.status(404).json({ message: 'Not found' });
+  res.json(match);
+});
+
+// Message endpoints
+app.get('/api/messages/:matchId', authMiddleware, async (req, res) => {
+  const messages = await Message.find({ match: req.params.matchId }).sort({ createdAt: 1 });
+  res.json(messages);
+});
+
+app.post('/api/messages', authMiddleware, requireFields(['match', 'text']), async (req, res) => {
+  const message = new Message({
+    match: req.body.match,
+    sender: (req as any).user.userId,
+    text: req.body.text,
+  });
+  await message.save();
+  res.status(201).json(message);
 });
 
 app.get('/api/health', (_req, res) => {
