@@ -7,6 +7,13 @@ jest.mock('stripe', () => {
     default: jest.fn().mockImplementation(() => ({ checkout: { sessions: { create: jest.fn(() => ({ url: '' })) } } }))
   };
 });
+jest.mock('bcrypt', () => ({
+  __esModule: true,
+  default: {
+    hash: jest.fn(async () => 'hash'),
+    compare: jest.fn(async () => true)
+  }
+}));
 
 let app: any;
 let User: any;
@@ -43,16 +50,18 @@ describe('auth routes', () => {
   it('registers and logs in a user', async () => {
     const res = await request(app)
       .post('/api/auth/register')
-      .send({ name: 'Test', email: 't@example.com', password: 'pw' });
+      .send({ name: 'Test', email: 't@example.com', password: 'pw', role: 'athlete', sport: 'Soccer' });
     expect(res.status).toBe(201);
     expect(res.body.token).toBeDefined();
     expect(res.body.verifyToken).toBeDefined();
+    expect(res.body.user.role).toBe('athlete');
 
     const login = await request(app)
       .post('/api/auth/login')
       .send({ email: 't@example.com', password: 'pw' });
     expect(login.status).toBe(200);
     expect(login.body.token).toBeDefined();
+    expect(login.body.user.role).toBe('athlete');
   });
 
   it('verifies user with token', async () => {
