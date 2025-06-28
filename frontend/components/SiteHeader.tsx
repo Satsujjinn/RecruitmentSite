@@ -3,9 +3,9 @@ import Link from 'next/link';
 
 export default function SiteHeader() {
   return (
-    <header className="bg-green-900 text-white sticky top-0 z-50">
+    <header className="bg-pink-600 text-yellow-200 sticky top-0 z-50 animate-bounce">
       <div className="max-w-6xl mx-auto flex items-center justify-between p-4">
-        <Link href="/" className="font-bold text-lg">TalentScout</Link>
+        <Link href="/" className="font-bold text-lg">TalentScout 🤡</Link>
         <nav className="space-x-4 text-sm">
           <Link href="/login" className="hover:underline">
             Sign In
