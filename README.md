@@ -19,6 +19,23 @@ npm install --workspaces
 Edit both `.env` files and provide values for `JWT_SECRET`, `MONGO_URI` and
 the optional AWS settings if you plan to upload avatars.
 
+### Using MongoDB Atlas
+
+You can host MongoDB in the cloud with [MongoDB Atlas](https://www.mongodb.com/cloud/atlas):
+
+1. Create a free account and deploy a **Shared** cluster.
+2. In **Database Access**, create a user and password.
+3. In **Network Access**, allow your IP address.
+4. From **Connect** → **Connect Your Application**, copy the connection string.
+5. Update `server/.env` so `MONGO_URI` points at your Atlas URL, e.g.
+
+   ```
+   MONGO_URI=mongodb+srv://user:pass@cluster0.mongodb.net/talentscout?retryWrites=true&w=majority
+   ```
+
+Start the API server after saving the file and ensure the frontend's
+`NEXT_PUBLIC_API_URL` points at the server.
+
 Use **Node.js 18** when installing dependencies. Newer Node versions may fail to
 load the `lightningcss` binary that Next.js depends on.
 If you see an error like `Cannot find module '../lightningcss.darwin-arm64.node'`,

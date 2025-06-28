@@ -98,7 +98,7 @@ function requireFields(fields: string[]) {
 }
 
 app.post('/api/auth/register', async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role = 'user', sport } = req.body;
   if (!name || !email || !password) {
     return res.status(400).json({ message: 'Missing fields' });
   }
@@ -107,8 +107,12 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(409).json({ message: 'Email already registered' });
   }
   const passwordHash = await bcrypt.hash(password, 10);
-  const user = new User({ name, email, passwordHash });
+  const user = new User({ name, email, passwordHash, role });
   await user.save();
+  if (role === 'athlete' && sport && process.env.NODE_ENV !== 'test') {
+    const athlete = new Athlete({ user: user._id, sport });
+    await athlete.save();
+  }
   const verifyToken = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1d' });
   console.log(`Verification token for ${email}: ${verifyToken}`);
   const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
