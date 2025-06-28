@@ -8,14 +8,14 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: theme(fontFamily.sans);
+  --font-sans: 'Comic Sans MS', cursive, sans-serif;
   --font-mono: theme(fontFamily.mono);
 }
 
 
 
 body {
-  background: var(--color-background);
+  background: linear-gradient(45deg, #ff69b4, #ffcc00);
   color: var(--color-foreground);
   font-family: var(--font-sans);
 }
