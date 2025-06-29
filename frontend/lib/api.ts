@@ -1,8 +1,8 @@
-import axios from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 const useMock = !process.env.NEXT_PUBLIC_API_URL;
 
-let api: any;
+let api: AxiosInstance;
 
 if (useMock) {
   const mockAthletes = [
@@ -60,13 +60,13 @@ if (useMock) {
     post: async () => ({ data: {} }),
     patch: async () => ({ data: {} }),
     put: async () => ({ data: {} }),
-  };
+  } as unknown as AxiosInstance;
 } else {
   api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
   });
 
-  api.interceptors.request.use((config: any) => {
+  api.interceptors.request.use((config: AxiosRequestConfig) => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('auth');
       if (stored) {

@@ -78,7 +78,7 @@ export default function AthleteDashboard() {
       socket.off('match', onMatch);
       closeSocket();
     };
-  }, [athleteId, user]);
+  }, [athleteId, user, router]);
 
   useEffect(() => {
     if (!loading) {

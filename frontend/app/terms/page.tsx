@@ -8,7 +8,7 @@ export default function TermsPage() {
         <h2 className="text-xl font-semibold mb-2">Acceptance of Terms</h2>
         <p>
           By accessing this demo you agree to use it solely for evaluation
-          purposes. The application is provided "as is" with no warranties or
+          purposes. The application is provided &quot;as is&quot; with no warranties or
           guarantees.
         </p>
       </section>
