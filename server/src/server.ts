@@ -13,6 +13,8 @@ import Athlete from './models/Athlete';
 import Recruiter from './models/Recruiter';
 import Match from './models/Match';
 import Message from './models/Message';
+import User from './models/User';
+import { seedDatabase } from './seed';
 
 dotenv.config();
 
@@ -30,21 +32,13 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 });
 
 mongoose.connect(MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
+  .then(async () => {
+    console.log('MongoDB connected');
+    if (process.env.SEED_DB === 'true') {
+      await seedDatabase();
+    }
+  })
   .catch((err) => console.error('MongoDB connection error', err));
-
-// User schema
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  passwordHash: { type: String, required: false },
-  role: { type: String, default: 'user' },
-  isVerified: { type: Boolean, default: false },
-  isSubscribed: { type: Boolean, default: false },
-  avatar: String,
-}, { timestamps: true });
-
-export const User = mongoose.model('User', userSchema);
 
 // AWS S3 setup
 const s3 = new S3Client({
@@ -330,3 +324,4 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 export default app;
+export { User };
