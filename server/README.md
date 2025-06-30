@@ -15,3 +15,13 @@ The server connects to MongoDB using the `MONGO_URI` environment variable. Set `
 ## WebSocket API
 
 Socket.IO is used for real-time chat. Connect to `ws://localhost:3001/socket.io` (replace host and port as needed) and optionally provide `userId` and `roomId` as query parameters. Clients can emit a `join` event with a room id to subscribe and send `message` events with `{ roomId, text, senderId }` to chat. All messages are broadcast to the room and persisted in MongoDB.
+
+## Seeding the Database
+
+Run the seed script after configuring your `.env` file to populate MongoDB with sample data. This creates an athlete, a recruiter and related records.
+
+```bash
+npm run seed
+```
+
+Set the `SEED_DB` environment variable to `true` when starting the server if you want the data seeded automatically on connect.
